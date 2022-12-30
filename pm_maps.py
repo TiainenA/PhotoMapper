@@ -47,7 +47,6 @@ def addPhotosToMap(map:folium.Map, folder:pm_photos.photoFolder):
 
 def main():
     kuvaKansio=pm_photos.photoFolder('kuva')
-    firstImage=list(kuvaKansio.imageDict.values())[0]
     
     bounds=setbounds(kuvaKansio)
 
