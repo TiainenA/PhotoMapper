@@ -7,8 +7,9 @@ from GPSPhoto import gpsphoto
 
 from geopy.geocoders import GeoNames #For naming the coordinates. Optional feature
 from userSpecifics import geonames_username, geonames_falseusername#git ignored
-geo = GeoNames(username=geonames_username)
+geo = GeoNames(username=geonames_falseusername)
 
+from datetime import datetime #for making making the timestamp more usable
 
 from pprint import pprint #For debugging only
 
@@ -23,6 +24,7 @@ class photo:
         self._img=Image.open(self._path)
         self._exif = self._exif_to_tag(piexif.load(self._img.info.get('exif')))
         self._locationText=self._reverseGeo()
+        self._timeTaken=self._makeTimestamp()
         self._formResizePath()
         self._resize()
     
@@ -51,7 +53,21 @@ class photo:
     def resizepath(self):
         """I'm the 'resizepath' property."""
         return self._resizepath
-   
+    @property
+    def timeTaken(self):
+        """I'm the 'timeTaken' property."""
+        return self._timeTaken   
+
+
+    def __lt__(self, other):
+        return self.timeTaken < other.timeTaken
+
+    def __gt__(self, other):
+        return self.timeTaken > other.timeTaken
+
+    def __eq__(self, other):
+        return self.timeTaken == other.timeTaken            
+
     def _formResizePath(self):
         head, tail = os.path.split(self._path)
 
@@ -60,9 +76,10 @@ class photo:
 
             
         value=os.path.join(head,"resize","resize"+tail)
-        print(value)
             
         self._resizepath = value
+    
+    
     def _resize(self):
         if self.exif['Exif']['PixelXDimension']> self.exif['Exif']['PixelYDimension']:
             resizeWidth=imageLongSide
@@ -83,8 +100,11 @@ class photo:
         codec = 'ISO-8859-1'  # or latin-1
         exif_tag_dict = {}
         thumbnail = exif_dict.pop('thumbnail')
-        exif_tag_dict['thumbnail'] = thumbnail.decode(codec)
-
+        try:
+            exif_tag_dict['thumbnail'] = thumbnail.decode(codec)
+        except:
+            print(f"no thumbnail on {self._path}")
+            pass
         for ifd in exif_dict:
             exif_tag_dict[ifd] = {}
             for tag in exif_dict[ifd]:
@@ -105,6 +125,16 @@ class photo:
             palautettava=[(f"Location {self._location['Latitude']},{self._location['Longitude']}")]
         return(palautettava)
 
+    def _makeTimestamp(self):
+        try:
+            timestamp = datetime.strptime(self.exif['Exif']['DateTimeDigitized'], '%Y:%m:%d %H:%M:%S')
+        except ValueError as ve1:
+            print('ValueError 1:', ve1)
+            print("setting time to now")
+            timestamp= datetime.now().strftime('%Y:%m:%d %H:%M:%S')
+        return(timestamp)
+
+
 
 class photoFolder:
     def __init__(self,folderName):
@@ -112,8 +142,11 @@ class photoFolder:
         self._folderName=folderName
         self._remove_resizes(folderName)
 
-        self.imageDict=self.list_images(folderName)
-    
+        self.imageList=self.list_images(folderName)
+
+        self.imageList.sort()
+
+
     @property
     def folderName(self):
         """I'm the 'folderName' property."""
@@ -121,22 +154,23 @@ class photoFolder:
 
 
     def _remove_resizes(self, kansio):
-        resizePath=os.path.join(os.getcwd(),kansio,"resize")
+        resizePath=os.path.join(self._folderName,"resize")
         if os.path.exists(resizePath):
             shutil.rmtree(resizePath)
 
 
     def list_images(self,kansio):
 
-        KuvaKansio=os.path.join(os.getcwd(),kansio)
-        KuvaLista =os.listdir(KuvaKansio)
+        KuvaKansio=os.path.join('.',kansio)
+        KuvakansionKuvat =os.listdir(KuvaKansio)
         KuvaPolut=[]
-        for filename in KuvaLista:
+        for filename in KuvakansionKuvat:
             KuvaPolut.append(os.path.join(KuvaKansio, filename))
-        palautettava={}
-        for kuva in KuvaLista:
+        palautettava=[]
+        for kuva in KuvakansionKuvat:
                 for polku in KuvaPolut:
-                    palautettava[kuva] = photo(polku)
+                    kuva = photo(polku)
+                    palautettava.append(kuva)
                     KuvaPolut.remove(polku)
                     break
 
@@ -149,22 +183,11 @@ class photoFolder:
 
 
 def main():
-    kuvat=photoFolder('kuva')
-    
-    print(kuvat.imageDict.keys())
-    for x in kuvat.imageDict.keys():
-        
-         pprint(x)
-         pprint(kuvat.imageDict[x].location)
-    #     pprint(kuvat.imageDict[x].location['UTC-Time'])
-    #     pprint(kuvat.imageDict[x].resizepath)
-         pprint(kuvat.imageDict[x].exif)
-         pprint(kuvat.imageDict[x].exif['Exif']['PixelXDimension'])
-    #     pprint(kuvat.imageDict[x].locationText[0])
-    #     kuvat.imageDict[x].locationText[0]="hattu"
-    #     pprint(kuvat.imageDict[x].locationText[0])        
-    
-    #print(list(kuvat.imageDict.keys())[0])
+    kuvat=photoFolder('kuvia')
+    for photo in kuvat.imageList:
+        print(photo.timeTaken)
+
+    #print(list(kuvat.imageList.keys())[0])
 
 
     

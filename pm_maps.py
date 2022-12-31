@@ -10,7 +10,7 @@ def setbounds(folder:pm_photos.photoFolder):
     longs=[]
 
 
-    for photo in folder.imageDict.values():
+    for photo in folder.imageList:
         lats.append(photo.location['Latitude'])
         longs.append(photo.location['Longitude'])
     bounds["north"]=max(lats)
@@ -22,7 +22,7 @@ def setbounds(folder:pm_photos.photoFolder):
 
 
 def addPhotosToMap(map:folium.Map, folder:pm_photos.photoFolder):
-    for photo in folder.imageDict.values():
+    for photo in folder.imageList:
         if photo.exif['Exif']['PixelXDimension']> photo.exif['Exif']['PixelYDimension']:
             resizeWidth=pm_photos.imageLongSide
             resizeHeight=pm_photos.imageShortSide
@@ -43,10 +43,20 @@ def addPhotosToMap(map:folium.Map, folder:pm_photos.photoFolder):
     
     return(map)
 
+def addLineToMap(map:folium.Map, folder:pm_photos.photoFolder):
+    markerList=[]
+    for photo in folder.imageList:
+        markerList.append([photo.location['Latitude'],photo.location['Longitude']])
+    picurePath=folium.PolyLine(locations=markerList,weight=5)
+    map.add_child(picurePath)
+
+
+    return(map)
+
 
 
 def main():
-    kuvaKansio=pm_photos.photoFolder('kuva')
+    kuvaKansio=pm_photos.photoFolder('kuvia')
     
     bounds=setbounds(kuvaKansio)
 
@@ -55,6 +65,7 @@ def main():
      
     kartta.fit_bounds([[bounds['south'],bounds['west']],[bounds['north'],bounds['east']]])
     folium.LayerControl().add_to(kartta)	
+    addLineToMap(kartta,kuvaKansio)
 
 
 
