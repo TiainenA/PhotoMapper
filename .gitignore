@@ -5,6 +5,8 @@ __pycache__/
 
 #
 userSpecifics.py
+test.py
+*.zip
 #
 photos/
 *.jpg
