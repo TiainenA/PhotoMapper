@@ -8,4 +8,6 @@ Set pictures with location data in a folder and run pm_maps.py where you define 
 If nothing goes wrong the script will first load the pictures in the photoFolder-class and then feed that to the map.
 Then index.html (or what ever you choose) will pop out
 
+For Geonames to work, make an account to https://www.geonames.org/ and allow free services
+
 Note: the error handling is quite horrible, but will improve overtime 
