@@ -6,8 +6,8 @@ import piexif
 from GPSPhoto import gpsphoto
 
 from geopy.geocoders import GeoNames #For naming the coordinates. Optional feature
-from userSpecifics import geonames_username, geonames_falseusername#git ignored
-geo = GeoNames(username=geonames_falseusername)
+#from userSpecifics import geonames_username, geonames_falseusername#git ignored
+geo = GeoNames(username="geonames_username")#add a realone to here
 
 from datetime import datetime #for making making the timestamp more usable
 

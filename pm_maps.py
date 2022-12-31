@@ -54,7 +54,6 @@ def addLineToMap(map:folium.Map, folder:pm_photos.photoFolder):
     return(map)
 
 
-
 def main():
     kuvaKansio=pm_photos.photoFolder('kuvia')
     
@@ -65,7 +64,7 @@ def main():
      
     kartta.fit_bounds([[bounds['south'],bounds['west']],[bounds['north'],bounds['east']]])
     folium.LayerControl().add_to(kartta)	
-    addLineToMap(kartta,kuvaKansio)
+    #addLineToMap(kartta,kuvaKansio)
 
 
 
